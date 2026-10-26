@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Панель группы — переход…</title>
+<style>body{font:16px system-ui,sans-serif;background:#1b2532;color:#f1e7da;display:grid;place-items:center;height:100vh;margin:0;text-align:center;padding:0 16px}
+b{color:#e08a52}</style></head>
+<body><p id="m">Открываем <b>Панель группы</b>…</p>
+<script>
+// the panel runs on the company server behind a tunnel whose address changes; url.json holds the current one
+const m = document.getElementById("m");
+const down = () => { m.textContent = "Панель сейчас недоступна — сервер перезапускается или нет интернета. Попробуйте через пару минут."; };
+async function go(d, tries) {
+  try {
+    const r = await fetch(d.url + "/health?t=" + Date.now(), { cache: "no-store" });
+    if (r.ok) return location.replace(d.url + "/");
+  } catch (e) {}
+  if (tries <= 0) return down();
+  m.textContent = "Панель переподключается, подождите…";
+  setTimeout(() => go(d, tries - 1), 5000);
+}
+fetch("url.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(d => {
+  if (!/^https:\/\/(?!api\.)[a-z0-9-]+\.trycloudflare\.com$/.test(d.url || "")) throw new Error("no url");
+  go(d, 12);
+}).catch(down);
+</script></body></html>
