@@ -12,8 +12,9 @@ const m = document.getElementById("m");
 const down = () => { m.textContent = "Панель сейчас недоступна — сервер перезапускается или нет интернета. Попробуйте через пару минут."; };
 async function go(d, tries) {
   try {
-    const r = await fetch(d.url + "/health?t=" + Date.now(), { cache: "no-store" });
-    if (r.ok) return location.replace(d.url + "/");
+    // another origin: the answer is opaque, a resolved request is enough to know the server is up
+    await fetch(d.url + "/health?t=" + Date.now(), { cache: "no-store", mode: "no-cors" });
+    return location.replace(d.url + "/");
   } catch (e) {}
   if (tries <= 0) return down();
   m.textContent = "Панель переподключается, подождите…";
